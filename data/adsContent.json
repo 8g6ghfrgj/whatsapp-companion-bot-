@@ -1,165 +1,0 @@
-{
-  "fileName": "adsContent.json",
-  "filePath": "./data/adsContent.json",
-  "description": "ملف تخزين محتوى الإعلانات للنشر التلقائي",
-  "structure": {
-    "campaigns": "قائمة الحملات الإعلانية",
-    "templates": "قوالب الإعلانات الجاهزة",
-    "schedule": "جدولة النشر",
-    "history": "سجل النشر",
-    "settings": "إعدادات النشر"
-  },
-  "initialContent": {
-    "campaigns": [
-      {
-        "id": "campaign_1700000000000_abc123",
-        "title": "إعلان ترحيبي",
-        "content": {
-          "type": "text",
-          "text": "مرحباً بكم في مجموعتنا! نحن سعداء بانضمامكم إلينا. يمكنكم المشاركة بكل حرية والاستفادة من المحتوى المميز.",
-          "title": "رسالة ترحيب"
-        },
-        "createdAt": "2024-01-01T10:00:00.000Z",
-        "status": "active",
-        "schedule": null,
-        "stats": {
-          "targetGroups": 0,
-          "publishedGroups": 0,
-          "successRate": 0
-        },
-        "metadata": {
-          "author": "مدير البوت",
-          "tags": ["ترحيب", "معلومات"],
-          "priority": "medium"
-        }
-      }
-    ],
-    "templates": [
-      {
-        "id": "template_welcome",
-        "name": "ترحيب بالمجموعة",
-        "type": "text",
-        "content": "أهلاً وسهلاً بكم في مجموعتنا المميزة! نتمنى لكم وقتاً مفيداً وممتعاً معنا.",
-        "variables": ["{groupName}", "{adminName}"],
-        "category": "ترحيب"
-      },
-      {
-        "id": "template_promo",
-        "name": "ترويج خدمة",
-        "type": "text",
-        "content": "نقدم لكم خدمة مميزة بجودة عالية وأسعار تنافسية. للاستفسار تواصلوا معنا على الخاص.",
-        "variables": ["{service}", "{contact}"],
-        "category": "ترويج"
-      },
-      {
-        "id": "template_announcement",
-        "name": "إعلان عام",
-        "type": "text",
-        "content": "تنبيه هام: {announcementText}\nشكراً لتفهمكم وتعاونكم.",
-        "variables": ["{announcementText}"],
-        "category": "إعلان"
-      }
-    ],
-    "schedule": [
-      {
-        "campaignId": "campaign_1700000000000_abc123",
-        "scheduleTime": "2024-01-01T14:00:00.000Z",
-        "repeat": "once",
-        "daysOfWeek": [],
-        "enabled": true
-      }
-    ],
-    "history": [
-      {
-        "campaignId": "campaign_1700000000000_abc123",
-        "publishedAt": "2024-01-01T10:30:00.000Z",
-        "groupsCount": 5,
-        "successful": 5,
-        "failed": 0,
-        "duration": "00:05:30"
-      }
-    ],
-    "settings": {
-      "defaultDelay": 30000,
-      "maxGroupsPerHour": 100,
-      "skipExistingGroups": true,
-      "retryFailed": true,
-      "maxRetries": 3,
-      "autoGenerateReports": true,
-      "notifyOnComplete": true,
-      "notificationJid": "admin@jid"
-    },
-    "metadata": {
-      "lastUpdated": "2024-01-01T10:00:00.000Z",
-      "totalCampaigns": 1,
-      "totalPublished": 5,
-      "successRate": 100,
-      "version": "1.0.0"
-    }
-  },
-  "contentTypes": [
-    {
-      "type": "text",
-      "description": "إعلان نصي عادي",
-      "fields": ["text", "title"]
-    },
-    {
-      "type": "image",
-      "description": "إعلان بصورة",
-      "fields": ["url", "caption", "title", "mimetype"]
-    },
-    {
-      "type": "video",
-      "description": "إعلان بفيديو",
-      "fields": ["url", "caption", "title", "mimetype"]
-    },
-    {
-      "type": "document",
-      "description": "إعلان بمستند",
-      "fields": ["url", "caption", "title", "mimetype", "fileName"]
-    },
-    {
-      "type": "contact",
-      "description": "إعلان بجهة اتصال",
-      "fields": ["name", "phone", "title"]
-    }
-  ],
-  "scheduleOptions": {
-    "repeat": ["once", "daily", "weekly", "monthly"],
-    "daysOfWeek": ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
-    "timesOfDay": ["morning", "afternoon", "evening", "night"]
-  },
-  "exampleCampaigns": [
-    {
-      "id": "campaign_welcome_new",
-      "title": "ترحيب بالأعضاء الجدد",
-      "content": {
-        "type": "text",
-        "text": "🎉 أهلاً وسهلاً بالأعضاء الجدد!\n\nنتمنى لكم تجربة ممتعة في مجموعتنا.\n\n📌 قواعد المجموعة:\n1- الاحترام المتبادل\n2- عدم نشر محتوى غير لائق\n3- المشاركة الفعالة\n\n🔔 للاستفسارات: تواصل مع الإدارة",
-        "title": "ترحيب وتوعية"
-      },
-      "schedule": {
-        "time": "12:00",
-        "repeat": "daily",
-        "enabled": true
-      }
-    },
-    {
-      "id": "campaign_promo_service",
-      "title": "ترويج الخدمات",
-      "content": {
-        "type": "image",
-        "url": "https://example.com/service-promo.jpg",
-        "caption": "🔥 عرض خاص على خدماتنا!\n\n✅ جودة عالية\n✅ أسعار منافسة\n✅ دعم فني 24/7\n\n📞 للطلب: 0551234567",
-        "title": "عروض خدمات"
-      }
-    }
-  ],
-  "notes": [
-    "يمكن إضافة حملات جديدة عبر واجهة البوت",
-    "القوالب تساعد في إنشاء إعلانات سريعة",
-    "الجدولة تتيح النشر التلقائي في أوقات محددة",
-    "يتم حفظ سجل النشر للرجوع إليه",
-    "الإعدادات تتحكم في سلوك النظام"
-  ]
-}
