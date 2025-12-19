@@ -1,6 +1,6 @@
 /**
- * WhatsApp Account – FINAL STABLE VERSION
- * حل نهائي لمشكلة إغلاق الاتصال قبل الربط
+ * WhatsApp Account – FINAL (Pairing Code Only)
+ * ربط واتساب بدون QR باستخدام رمز اقتران
  */
 
 const path = require('path');
@@ -22,7 +22,7 @@ class WhatsAppAccount {
     this.id = id;
     this.sock = null;
     this.connected = false;
-    this.isLinking = true; // ⛔ يمنع reconnect أثناء الربط
+    this.phoneNumber = null;
 
     this.sessionPath = path.join(
       __dirname,
@@ -72,11 +72,13 @@ class WhatsAppAccount {
     }
   }
 
-  // =========================
-  // الاتصال (الحل النهائي هنا)
-  // =========================
-  async connect() {
-    logger.info(`🔗 بدء ربط حساب واتساب: ${this.id}`);
+  // ==================================================
+  // ✅ الاتصال باستخدام Pairing Code (بدون QR نهائيًا)
+  // ==================================================
+  async connectWithPairing(phoneNumber) {
+    this.phoneNumber = phoneNumber;
+
+    logger.info(`🔗 بدء ربط حساب واتساب برقم الهاتف: ${phoneNumber}`);
 
     const { state, saveCreds } = await useMultiFileAuthState(
       this.sessionPath
@@ -85,52 +87,36 @@ class WhatsAppAccount {
     this.sock = makeWASocket({
       auth: state,
       logger: Pino({ level: 'silent' }),
-
-      // ✅ إعدادات حاسمة لمنع الإغلاق المبكر
       browser: ['WhatsApp Companion', 'Chrome', '120.0'],
-      keepAliveIntervalMs: 30000,
-      connectTimeoutMs: 60000,
-      qrTimeout: 60000,
-
-      // لا نطبع QR ولا نعيد الاتصال تلقائيًا
-      emitOwnEvents: true,
-      shouldIgnoreJid: () => false
+      printQRInTerminal: false
     });
 
     this.sock.ev.on('creds.update', saveCreds);
 
+    // 🔐 طلب رمز الاقتران
+    try {
+      const code = await this.sock.requestPairingCode(phoneNumber);
+      logger.info(`🔐 Pairing Code (${this.id}): ${code}`);
+      logger.info(
+        '📱 افتح واتساب → الأجهزة المرتبطة → ربط جهاز → الربط برقم الهاتف'
+      );
+    } catch (err) {
+      logger.error('❌ فشل إنشاء Pairing Code', err);
+      return;
+    }
+
     this.sock.ev.on('connection.update', (update) => {
-      const { connection, lastDisconnect, qr } = update;
+      const { connection, lastDisconnect } = update;
 
-      // ===== QR تم إنشاؤه =====
-      if (qr) {
-        logger.info('📲 تم إنشاء QR – بانتظار المسح (حتى 60 ثانية)');
-        // لا نغلق الاتصال ولا نعيد المحاولة
-        return;
-      }
-
-      // ===== تم الربط بنجاح =====
       if (connection === 'open') {
         this.connected = true;
-        this.isLinking = false;
-
         logger.info(`✅ تم ربط الحساب بنجاح: ${this.id}`);
 
         registerWhatsAppEvents(this.sock, this.id);
         processGroupQueue(this.sock, this.id);
-        return;
       }
 
-      // ===== تم إغلاق الاتصال =====
       if (connection === 'close') {
-        this.connected = false;
-
-        // ⛔ أثناء الربط: لا نعيد الاتصال
-        if (this.isLinking) {
-          logger.warn('⏳ انتهت مهلة الربط بدون مسح QR');
-          return;
-        }
-
         const reason =
           lastDisconnect?.error?.output?.statusCode;
 
@@ -139,18 +125,10 @@ class WhatsAppAccount {
           return;
         }
 
-        logger.warn('🔁 انقطع الاتصال – إعادة المحاولة');
-        this.reconnect();
+        logger.warn('⚠️ انقطع الاتصال – إعادة المحاولة');
+        this.connectWithPairing(this.phoneNumber);
       }
     });
-  }
-
-  async reconnect() {
-    try {
-      await this.connect();
-    } catch (err) {
-      logger.error(`❌ فشل إعادة الاتصال للحساب ${this.id}`, err);
-    }
   }
 
   async logout() {
