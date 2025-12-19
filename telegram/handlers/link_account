@@ -1,18 +1,14 @@
 /**
  * Telegram Handler – Link WhatsApp Account (Pairing Code)
- * المسؤول عن:
- * - بدء عملية ربط الحساب
- * - طلب رقم الهاتف من المستخدم
- * - تشغيل connectWithPairing
+ * - يطلب رقم الهاتف
+ * - يبدأ الربط
+ * - يرسل Pairing Code الحقيقي إلى تيليجرام
  */
 
-const WhatsAppAccount = require('../../whatsapp/accounts/account');
-const {
-  createAccount
-} = require('../../whatsapp/accounts/index');
+const { createAccount } = require('../../whatsapp/accounts');
 const logger = require('../../utils/logger');
 
-// تخزين حالة انتظار رقم الهاتف لكل مستخدم تيليجرام
+// حالة انتظار رقم الهاتف لكل مستخدم
 const waitingForPhone = new Map();
 
 /**
@@ -39,16 +35,11 @@ async function handlePhoneNumber(bot, msg) {
   const chatId = msg.chat.id;
   const text = msg.text ? msg.text.trim() : '';
 
-  // إذا لم يكن المستخدم في وضع ربط
   if (!waitingForPhone.has(chatId)) return;
-
-  // تجاهل الأوامر
   if (text.startsWith('/')) return;
 
-  // تنظيف الرقم
   const phone = text.replace(/\s+/g, '');
 
-  // تحقق بسيط من صحة الرقم
   if (!/^\d{8,15}$/.test(phone)) {
     await bot.sendMessage(
       chatId,
@@ -61,7 +52,6 @@ async function handlePhoneNumber(bot, msg) {
     return;
   }
 
-  // إلغاء وضع الانتظار
   waitingForPhone.delete(chatId);
 
   // إنشاء حساب جديد
@@ -72,24 +62,37 @@ async function handlePhoneNumber(bot, msg) {
     '🔗 يتم الآن إنشاء جلسة ربط واتساب...\n\n' +
       '📲 سيتم توليد *رمز اقتران* خلال لحظات\n\n' +
       'اذهب إلى واتساب:\n' +
-      'الأجهزة المرتبطة → ربط جهاز → الربط برقم الهاتف',
+      'الإعدادات → الأجهزة المرتبطة → ربط جهاز → الربط برقم الهاتف',
     { parse_mode: 'Markdown' }
   );
 
   try {
-    // بدء الربط برقم الهاتف
+    // بدء الربط
     await account.connectWithPairing(phone);
+
+    // انتظار لحظة حتى يتم حفظ الرمز
+    let tries = 0;
+    while (!account.pairingCode && tries < 20) {
+      await new Promise(r => setTimeout(r, 300));
+      tries++;
+    }
+
+    if (!account.pairingCode) {
+      throw new Error('Pairing Code لم يتم توليده');
+    }
 
     await bot.sendMessage(
       chatId,
-      '🔐 *تم توليد رمز الاقتران*\n\n' +
-        '📱 افتح واتساب وأدخل الرمز الذي ظهر في السيرفر\n\n' +
-        `🆔 *معرّف الحساب:*\n\`${account.id}\``,
+      '🔐 *رمز الاقتران (Pairing Code)*\n\n' +
+        `\`${account.pairingCode}\`\n\n` +
+        '📱 افتح واتساب وأدخل الرمز:\n' +
+        'الإعدادات → الأجهزة المرتبطة → ربط جهاز → الربط برقم الهاتف\n\n' +
+        '⚠️ لا تشارك هذا الرمز مع أي شخص',
       { parse_mode: 'Markdown' }
     );
 
     logger.info(
-      `📱 بدء Pairing Code للحساب ${account.id} (phone: ${phone})`
+      `📱 Pairing Code أُرسل إلى تيليجرام للحساب ${account.id}`
     );
   } catch (err) {
     logger.error('❌ فشل ربط حساب واتساب', err);
