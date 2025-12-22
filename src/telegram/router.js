@@ -22,15 +22,18 @@ bot.onText(/\/start/, (msg) => {
 });
 
 // =====================================
-// Inline Button Router
+// Inline Button Router (FIXED)
 // =====================================
 bot.on('callback_query', async (query) => {
-  const msg = query.message;
-  if (!isAdmin(msg)) return;
+  // ✅ الفحص الصحيح للأدمن
+  if (!query.from || query.from.id !== Number(process.env.TELEGRAM_ADMIN_ID)) {
+    return;
+  }
 
-  const chatId = msg.chat.id;
+  const chatId = query.message.chat.id;
   const action = query.data;
 
+  // نرد على Telegram فورًا
   try {
     await bot.answerCallbackQuery(query.id);
   } catch (_) {}
