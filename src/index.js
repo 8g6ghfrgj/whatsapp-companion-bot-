@@ -14,8 +14,11 @@ import { logger } from './logger/logger.js';
 // Database
 import { initDatabase } from './database/db.js';
 
-// Telegram (loads bot + router)
-import './telegram/router.js';
+// ================================
+// Telegram (CRITICAL ORDER)
+// ================================
+import './telegram/bot.js';     // ⬅️ لازم أولاً
+import './telegram/router.js';  // ⬅️ بعدها
 
 // WhatsApp (controller side-effects only)
 import './whatsapp/whatsapp.controller.js';
@@ -69,7 +72,6 @@ async function bootstrap() {
   logger.info('====================================');
 
   ensureDirectories();
-
   initDatabase();
 
   logger.info('Telegram bot initialized');
