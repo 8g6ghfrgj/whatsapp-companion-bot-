@@ -1,26 +1,21 @@
 {
-  "name": "whatsapp-telegram-control-system",
+  "name": "whatsapp-telegram-controller",
   "version": "1.0.0",
-  "description": "Telegram bot to control multiple WhatsApp accounts via Linked Devices",
-  "main": "index.js",
-  "type": "commonjs",
+  "description": "Telegram-controlled WhatsApp Web automation using real Chrome + Puppeteer",
+  "type": "module",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js",
-    "pm2": "pm2 start index.js --name wt-system",
-    "lint": "echo \"No lint configured\""
-  },
-  "author": "Mohammed",
-  "license": "MIT",
-  "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.7",
-    "dotenv": "^16.4.5",
-    "fs-extra": "^11.2.0",
-    "node-telegram-bot-api": "^0.66.0",
-    "pino": "^9.0.0",
-    "qrcode": "^1.5.4"
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-telegram-bot-api": "^0.66.0",
+    "puppeteer": "^22.8.0",
+    "sqlite3": "^5.1.7",
+    "winston": "^3.13.0"
   }
 }
